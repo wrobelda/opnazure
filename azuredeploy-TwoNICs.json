@@ -45,17 +45,6 @@
        "description": "Type Existing (Trusted) Subnet Name"
           }
     },
-      "PublicIPAddressSku": {
-      "type": "string",
-      "defaultValue": "Basic",
-      "allowedValues": [
-        "Basic",
-        "Standard"
-      ],
-      "metadata": {
-        "description": "Specify Public IP SKU either Basic (lowest cost) or Standard (Required for HA LB)"
-      }
-    },
     "OpnScriptURI": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/dmauser/opnazure/master/scripts/",
@@ -82,7 +71,6 @@
     "extensionName":"CustomScript",
     "UntrustedNIC": "[concat(parameters('virtualMachineName'),'-Untrusted-NIC')]",
     "TrustedNIC": "[concat(parameters('virtualMachineName'),'-Trusted-NIC')]",
-    "publicIPAddressName": "[concat(parameters('virtualMachineName'),'-PublicIP')]",
     "subnet1Ref": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('existingVirtualNetworkName'), parameters('existingUntrustedSubnet'))]",
     "subnet2Ref": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('existingVirtualNetworkName'), parameters('existingTrustedSubnet'))]",
     "networkSecurityGroupName": "[concat(parameters('virtualMachineName'),'-NSG')]",
@@ -145,7 +133,6 @@
       "location": "[variables('location')]",
       "comments": "This will be your Primary NIC Untrusted",
       "dependsOn": [
-        "[variables('publicIpAddressName')]",
         "[variables('networkSecurityGroupName')]"
       ],
       "properties": {
@@ -160,10 +147,7 @@
               "subnet": {
                 "id": "[variables('subnet1Ref')]"
               },
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIpAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
-              }
+              "privateIPAllocationMethod": "Dynamic"
             }
           }
         ]
@@ -196,20 +180,6 @@
         ]
        }
       },
-    {
-      "name": "[variables('publicIpAddressName')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2020-07-01",
-      "location": "[variables('location')]",
-      "comments": "Public IP for your WAN NIC",
-      "sku": {
-        "name": "[parameters('PublicIPAddressSku')]",
-        "tier": "Regional"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "Static"
-      }
-    },
 {
       "name": "[variables('networkSecurityGroupName')]",
       "type": "Microsoft.Network/networkSecurityGroups",
